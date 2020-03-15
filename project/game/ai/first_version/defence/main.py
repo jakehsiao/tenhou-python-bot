@@ -167,7 +167,7 @@ class DefenceHandler(object):
 
         # our hand is not tempai, so better to fold it
         if shanten != 0:
-            #logger.info("Not prepared, ready to fold.")
+            logger.info("Not prepared, ready to fold.")
             return True
 
         # we are in tempai, let's try to estimate hand value
@@ -357,6 +357,13 @@ class DefenceHandler(object):
         # find honors
         for i,c in enumerate(self.closed_hand_34[27:]):
             if c >= 1:
+                logger.info("Defence with honors.")
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # find 19
+        for i, c in enumerate(self.closed_hand_34):
+            if i % 9 in [0, 8] and c >= 1:
+                logger.info("Defence with 19.")
                 return DiscardOption(self.player, i, 7, [], 4)
 
         # find triplets
@@ -369,12 +376,6 @@ class DefenceHandler(object):
         for i,c in enumerate(self.closed_hand_34):
             if c >= 2:
                 logger.info("Defence with pairs.")
-                return DiscardOption(self.player, i, 7, [], 4)
-
-
-        # find 19
-        for i,c in enumerate(self.closed_hand_34):
-            if i % 9 in [0, 8] and c >= 1:
                 return DiscardOption(self.player, i, 7, [], 4)
 
         # find 28

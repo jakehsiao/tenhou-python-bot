@@ -30,10 +30,10 @@ class TanyaoStrategy(BaseStrategy):
         # Get hand index
         hand_index = len(self.player.discards)
 
-        if not ((dora_count >= 1) or (shanten <= 2 and hand_index <= 10) or self.player.is_dealer):
+        if not ((dora_count >= 1) or (shanten <= 1 and hand_index >= 8) or self.player.is_dealer):
             return False
 
-        if len(self.player.discards) <= 6:
+        if len(self.player.discards) <= 6 and (not self.player.is_dealer):
             # Do not activate it too early
             return False
 

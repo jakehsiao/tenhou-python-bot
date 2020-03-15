@@ -197,7 +197,7 @@ class TenhouClient(Client):
         if self.looking_for_game:
             logger.error('Game is not started. Can\'t find the game')
             self.end_game()
-            time.sleep(random.randint(120, 480))
+            time.sleep(random.randint(30,120))
             return
 
         logger.info('Game started')

@@ -25,7 +25,7 @@ COUNTER_RATIO = {
     "pro_bad_shape": [0.33 for i in range(25)],
 }
 
-POSITION_RANK = [6, 2, -2, -12]
+POSITION_RANK = [6, 2, -2, -6]
 
 
 class DefenceHandler(object):
@@ -146,9 +146,9 @@ class DefenceHandler(object):
             pass
 
         # more than 2 players are threatening, so defense is better
-        if len(threatening_players) >= 2:
-            logger.info("Watch those players feed each other!")
-            return True
+        #if len(threatening_players) >= 2:
+        #    logger.info("Watch those players feed each other!")
+        #    return True
 
         if shanten == 1:
         #     # When player is in 4th position, it's better to push in this situation
@@ -167,8 +167,13 @@ class DefenceHandler(object):
 
         # our hand is not tempai, so better to fold it
         if shanten != 0:
-            logger.info("Not prepared, ready to fold.")
+            #logger.info("Not prepared, ready to fold.")
             return True
+
+        # we are in tempai, if there are so many melds, don't go to defence
+        if len(self.player.melds) >= 2:
+            logger.info("Too many melds, should push.")
+            return False
 
         # we are in tempai, let's try to estimate hand value
         hands_estimated_cost = []

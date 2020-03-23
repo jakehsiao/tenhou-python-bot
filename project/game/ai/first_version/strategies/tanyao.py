@@ -30,12 +30,12 @@ class TanyaoStrategy(BaseStrategy):
         # Get hand index
         hand_index = len(self.player.discards)
 
-        if not ((dora_count >= 1) or (shanten <= 1 and hand_index >= 8) or self.player.is_dealer):
-            return False
+        #if not ((dora_count >= 1) or (shanten <= 1 and hand_index >= 8) or self.player.is_dealer):
+        #    return False
 
-        if len(self.player.discards) <= 6 and (not self.player.is_dealer):
+        #if len(self.player.discards) <= 6 and (not self.player.is_dealer):
             # Do not activate it too early
-            return False
+        #    return False
 
         tiles = TilesConverter.to_34_array(self.player.tiles)
         count_of_terminal_pon_sets = 0
@@ -67,8 +67,8 @@ class TanyaoStrategy(BaseStrategy):
 
         # no pair is ok in tanyao pair
         # but 1+ pairs can't be suitable
-        if count_of_terminal_pairs >= 1:
-            return False
+        #if count_of_terminal_pairs >= 1:
+        #    return False
 
         # 1234 and 9876 indices
         indices = [
@@ -87,8 +87,9 @@ class TanyaoStrategy(BaseStrategy):
                 num_terminal_lugs += 1
             if first + second + third >= 3:
                 num_terminal_lugs += 2
+        num_terminal_lugs += count_of_terminal_pairs
 
-        if num_terminal_lugs >= 1:
+        if num_terminal_lugs > 1:
             return False
 
         return True

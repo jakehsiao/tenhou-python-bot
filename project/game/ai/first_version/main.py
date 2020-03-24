@@ -271,11 +271,17 @@ class ImplementationAI(InterfaceAI):
             selected_tile = had_to_be_discarded_tiles[0]
         else:
             results = sorted(results, key=sorting)
+
+            # init the temp_tile
+            temp_tile = results[0]
+
             # remove needed tiles from discard options
             results = [x for x in results if not x.had_to_be_saved]
 
             # let's chose most valuable tile first
-            temp_tile = results[0]
+            if results:
+                temp_tile = results[0]
+
             # and let's find all tiles with same shanten
             results_with_same_shanten = [x for x in results if x.shanten == temp_tile.shanten]
             possible_options = [temp_tile]

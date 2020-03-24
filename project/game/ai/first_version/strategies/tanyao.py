@@ -33,9 +33,9 @@ class TanyaoStrategy(BaseStrategy):
         #if not ((dora_count >= 1) or (shanten <= 1 and hand_index >= 8) or self.player.is_dealer):
         #    return False
 
-        #if len(self.player.discards) <= 6 and (not self.player.is_dealer):
-            # Do not activate it too early
-        #    return False
+        if len(self.player.discards) <= 4:
+           #Do not activate it too early
+            return False
 
         tiles = TilesConverter.to_34_array(self.player.tiles)
         count_of_terminal_pon_sets = 0

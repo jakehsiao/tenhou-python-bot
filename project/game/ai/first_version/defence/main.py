@@ -171,9 +171,9 @@ class DefenceHandler(object):
             return True
 
         # we are in tempai, if there are so many melds, don't go to defence
-        if len(self.player.melds) >= 2:
-            logger.info("Too many melds, should push.")
-            return False
+        # if len(self.player.melds) >= 2:
+        #     logger.info("Too many melds, should push.")
+        #     return False
 
         # we are in tempai, let's try to estimate hand value
         hands_estimated_cost = []

@@ -173,8 +173,9 @@ class Table(object):
             return NORTH
 
     def _add_revealed_tile(self, tile):
-        tile //= 4
-        self.revealed_tiles[tile] += 1
+        if tile:
+            tile //= 4
+            self.revealed_tiles[tile] += 1
 
     def _init_players(self,):
         self.player = Player(self, 0, self.dealer_seat)

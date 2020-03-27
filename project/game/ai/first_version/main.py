@@ -265,12 +265,24 @@ class ImplementationAI(InterfaceAI):
             # to complete a hand
             return x.shanten, -x.tiles_count, x.valuation
 
+        # util for drawing
+        def get_order(t):
+            # if it is honor
+            if t // 9 >= 3:
+                return 0
+            else:
+                return min((t % 9), (8 - (t % 9))) + 1
+
+        def display_waiting(w):
+            return TilesConverter.to_one_line_string([t * 4 for t in w])
+
         had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
             had_to_be_discarded_tiles = sorted(had_to_be_discarded_tiles, key=sorting)
             selected_tile = had_to_be_discarded_tiles[0]
         else:
             results = sorted(results, key=sorting)
+            #print("Len: ", len(results))
 
             # init the temp_tile
             temp_tile = results[0]
@@ -281,9 +293,48 @@ class ImplementationAI(InterfaceAI):
             # let's chose most valuable tile first
             if results:
                 temp_tile = results[0]
+            else:
+                return temp_tile
 
             # and let's find all tiles with same shanten
             results_with_same_shanten = [x for x in results if x.shanten == temp_tile.shanten]
+
+
+
+
+            # if in drawing
+            if temp_tile.shanten == 0:
+                print("It's a drawing hand!")
+                print("Hand: {}".format(TilesConverter.to_one_line_string(self.player.tiles)))
+                # assume that temp tile got the biggest waiting
+                if temp_tile.tiles_count > 4:
+                    print("It's a good shape, go for it.")
+                else:
+                    print("It's a bad shape, need some calculation.")
+                    print("Possible choices: {}".format(TilesConverter.to_one_line_string([x.tile_to_discard*4 for x in results_with_same_shanten])))
+                    possible_choices = [(temp_tile, 99)]
+                    for r in results_with_same_shanten:
+                        print("\nCut:", display_waiting([r.tile_to_discard]))
+                        print("Waiting:", display_waiting(r.waiting))
+                        print("Order:", [get_order(t) for t in r.waiting])
+                        print("Outs:", r.tiles_count)
+                        if r.tiles_count == 0:
+                            print("It's an impossible drawing.")
+                            continue
+                        if len(r.waiting) == 1:
+                            print("It's an 1 out drawing.")
+                            possible_choices.append((r, get_order(r.waiting[0])))
+                        else:
+                            print("It's a multiple out drawing.")
+                            r.waiting.sort(key=get_order)
+                            possible_choices.append((r, get_order(r.waiting[0])))
+                    possible_choices.sort(key=lambda x: (x[1], -x[0].tiles_count))
+                    final_choice = possible_choices[0][0]
+                    print("\nChoice:", display_waiting([final_choice.tile_to_discard]), "with waiting", display_waiting(final_choice.waiting))
+
+                    return final_choice
+
+            # if not in drawing or in drawing with good shape
             possible_options = [temp_tile]
             for discard_option in results_with_same_shanten:
                 # there is no sense to check already chosen tile
@@ -302,6 +353,10 @@ class ImplementationAI(InterfaceAI):
             # let's sort got tiles by value and let's chose less valuable tile to discard
             possible_options = sorted(possible_options, key=lambda x: x.valuation)
             selected_tile = possible_options[0]
+
+            if selected_tile.shanten == 0:
+                print("\nChoice:", display_waiting([selected_tile.tile_to_discard]), "with waiting",
+                      display_waiting(selected_tile.waiting))
 
         return selected_tile
 

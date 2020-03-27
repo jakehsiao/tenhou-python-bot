@@ -91,12 +91,12 @@ class YakuhaiStrategy(BaseStrategy):
                 has_yakuhai_pon = True
 
         logger.info("Player has yakuhai pon? {}".format(has_yakuhai_pon))
-        logger.info("Is player the dealer? {}".format(self.player.is_dealer))
+        #logger.info("Is player the dealer? {}".format(self.player.is_dealer))
 
-        has_melds = (len(self.player.melds) > 0)
-        logger.info("Player has melds? {}".format(has_melds))
+        #has_melds = (len(self.player.melds) > 0)
+        #logger.info("Player has melds? {}".format(has_melds))
 
-        if self._is_yakuhai_pon(meld) or has_yakuhai_pon or self.player.is_dealer or (not has_melds):
+        if self._is_yakuhai_pon(meld) or has_yakuhai_pon:
             logger.info("It's fine to call this meld.")
             return meld, selected_tile
         else:

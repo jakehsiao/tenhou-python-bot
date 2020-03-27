@@ -131,3 +131,27 @@ class TanyaoStrategy(BaseStrategy):
         """
         tile //= 4
         return tile not in self.not_suitable_tiles
+
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        # Don't call meld too much
+        meld, selected_tile = super().try_to_call_meld(tile, is_kamicha_discard)
+
+        if not meld:
+            print("This is a bad meld, don't call it.")
+            return None, None
+
+        print("Detect a possible meld:", meld)
+        num_melds = len(self.player.melds)
+        if num_melds == 1:
+            print("Player has 1 meld, should continue?")
+            print("Shanten after call:", selected_tile.shanten)
+            if selected_tile.shanten <= 1:
+                print("Should go!")
+                return meld, selected_tile
+            else:
+                print("Too far away from drawing hand, should not call this.")
+                return None, None
+
+        else:
+            print("Keep attacking!")
+            return meld, selected_tile

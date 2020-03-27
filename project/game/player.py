@@ -72,7 +72,7 @@ class PlayerInterface(object):
     def add_discarded_tile(self, tile: Tile):
         # all tiles that were discarded after player riichi will be safe against him
         # because of furiten
-        if tile:  # debug because sometimes tile is None
+        if tile.value:  # debug because sometimes tile is None
             self.discards.append(tile)
             tile = tile.value // 4
             for player in self.table.players[1:]:

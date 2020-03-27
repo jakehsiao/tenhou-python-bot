@@ -38,6 +38,18 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([discarded_tile]), '5m')
         self.assertEqual(player.ai.previous_shanten, 0)
 
+    def test_discard_tile_with_badshape_drawing(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='11134557', pin='456', man='44')
+        player.init_hand(tiles)
+
+        player.draw_tile(self._string_to_136_tile(sou='9'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5s')
+        self.assertEqual(player.ai.previous_shanten, 0)
+
     def test_discard_tile_force_tsumogiri(self):
         table = Table()
         table.has_aka_dora = True

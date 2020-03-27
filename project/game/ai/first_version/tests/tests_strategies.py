@@ -545,9 +545,10 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
     def test_open_hand_and_discard_tiles_logic(self):
         table = self._make_table()
         player = table.player
+        player.discards = [0,0,0,0,0]
 
         # 2345779m1p256s44z
-        tiles = self._string_to_136_array(man='22345', sou='238', pin='256', honors='44')
+        tiles = self._string_to_136_array(man='22456', sou='238', pin='256', honors='44')
         player.init_hand(tiles)
 
         # if we are in tanyao

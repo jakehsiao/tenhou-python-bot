@@ -178,7 +178,15 @@ class Player(PlayerInterface):
         # it is important to use table method,
         # to recalculate revealed tiles and etc.
         self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
-        self.tiles.remove(tile_to_discard)
+
+        # debug defence with honors
+        if tile_to_discard in self.tiles:
+            self.tiles.remove(tile_to_discard)
+        else:
+            logger.info("Catch that bug: defence with honors")
+            logger.info("Hand: {}\nTile: {}".format(TilesConverter.to_one_line_string(self.tiles), TilesConverter.to_one_line_string([tile_to_discard])))
+            logger.info("Hand: {}\nTile: {}".format(self.tiles, tile_to_discard))
+            return self.tiles[-1]
 
         return tile_to_discard
 

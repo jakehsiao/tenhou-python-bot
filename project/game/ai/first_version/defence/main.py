@@ -363,6 +363,7 @@ class DefenceHandler(object):
         for i,c in enumerate(self.closed_hand_34[27:]):
             if c >= 1:
                 logger.info("Defence with honors.")
+                logger.info("Discard {}".format(TilesConverter.to_one_line_string([i*4])))
                 return DiscardOption(self.player, i, 7, [], 4)
 
         # find 19

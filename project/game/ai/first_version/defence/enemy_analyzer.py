@@ -69,7 +69,8 @@ class EnemyAnalyzer(object):
                 return True
 
             # check that user has a discard and melds that looks like honitsu
-            is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
+            # No need to check this!
+            #is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
 
         if is_honitsu_open_sets:
             # for 2 opened melds we had to check discard, to be sure

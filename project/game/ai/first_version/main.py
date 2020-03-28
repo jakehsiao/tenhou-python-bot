@@ -117,7 +117,11 @@ class ImplementationAI(InterfaceAI):
                 #logger.info("Player is alreay in defence")
                 pass
 
-            defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
+            defence_results, shanten = self.calculate_outs(self.player.tiles,
+                                                   self.player.closed_hand,
+                                                   self.player.open_hand_34_tiles)
+
+            defence_tile = self.defence.try_to_find_safe_tile_to_discard(defence_results)
             if defence_tile:
                 return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
@@ -310,8 +314,8 @@ class ImplementationAI(InterfaceAI):
                 if temp_tile.tiles_count > 4:
                     print("It's a good shape, go for it.")
                 else:
-                    print("It's a bad shape, need some calculation.")
-                    print("Possible choices: {}".format(TilesConverter.to_one_line_string([x.tile_to_discard*4 for x in results_with_same_shanten])))
+                    logger.info("It's a bad shape drawing hand, need some calculation.")
+                    logger.info("Possible choices: {}".format(TilesConverter.to_one_line_string([x.tile_to_discard*4 for x in results_with_same_shanten])))
                     possible_choices = [(temp_tile, 99)]
                     for r in results_with_same_shanten:
                         print("\nCut:", display_waiting([r.tile_to_discard]))
@@ -330,7 +334,7 @@ class ImplementationAI(InterfaceAI):
                             possible_choices.append((r, get_order(r.waiting[0])))
                     possible_choices.sort(key=lambda x: (x[1], -x[0].tiles_count))
                     final_choice = possible_choices[0][0]
-                    print("\nChoice:", display_waiting([final_choice.tile_to_discard]), "with waiting", display_waiting(final_choice.waiting))
+                    logger.info("Choice: {} {} {}".format(display_waiting([final_choice.tile_to_discard]), "with waiting", display_waiting(final_choice.waiting)))
 
                     return final_choice
 

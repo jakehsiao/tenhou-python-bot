@@ -4,7 +4,10 @@ from mahjong.tile import TilesConverter
 
 from game.ai.first_version.strategies.main import BaseStrategy
 from mahjong.utils import plus_dora, is_honor, is_aka_dora
+import logging
 
+
+logger = logging.getLogger("ai")
 
 class TanyaoStrategy(BaseStrategy):
     min_shanten = 3
@@ -140,16 +143,16 @@ class TanyaoStrategy(BaseStrategy):
             print("This is a bad meld, don't call it.")
             return None, None
 
-        print("Detect a possible meld:", meld)
+        logger.info("Detect a possible tanyao meld: {}".format(meld))
         num_melds = len(self.player.melds)
         if num_melds == 1:
-            print("Player has 1 meld, should continue?")
-            print("Shanten after call:", selected_tile.shanten)
+            logger.info("Player has 1 meld, should continue?")
+            logger.info("Shanten after call: {}".format(selected_tile.shanten))
             if selected_tile.shanten <= 1:
-                print("Should go!")
+                logger.info("Should go!")
                 return meld, selected_tile
             else:
-                print("Too far away from drawing hand, should not call this.")
+                logger.info("Too far away from drawing hand, should not call this.")
                 return None, None
 
         else:

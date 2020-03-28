@@ -351,7 +351,8 @@ class ImplementationAI(InterfaceAI):
 
                 # let's check all other tiles with same shanten
                 # maybe we can find tiles that have almost same tiles count number
-                if temp_tile.tiles_count - 2 < discard_option.tiles_count < temp_tile.tiles_count + 2:
+                # Cowboy: +-2 is a big difference, but +-1 is not
+                if temp_tile.tiles_count - 1 < discard_option.tiles_count < temp_tile.tiles_count + 1:
                     possible_options.append(discard_option)
 
             # let's sort got tiles by value and let's chose less valuable tile to discard

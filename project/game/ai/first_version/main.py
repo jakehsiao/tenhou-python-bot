@@ -308,7 +308,7 @@ class ImplementationAI(InterfaceAI):
             paired_tiles = [x for x in range(0, 34) if tiles_34[x] == 2]
             num_pairs = len(paired_tiles)
 
-            if num_pairs == 4 and temp_tile.shanten > 0 and not self.player.in_seven_pairs and not self.player.params.get("fool_in_pairs"):
+            if num_pairs == 4 and temp_tile.shanten > 1 and not self.player.in_seven_pairs and not self.player.params.get("fool_in_pairs"):
                 logger.info("There are 4 pairs!")
 
                 if len(self.player.discards) > 6:
@@ -325,7 +325,7 @@ class ImplementationAI(InterfaceAI):
 
             # TODO: a smart seven pairs strategy should be carried
             if self.player.in_seven_pairs and not self.player.params.get("fool_in_pairs"):
-                single_tiles = [x for x in range(0,34) if tiles_34[x] == 1]
+                single_tiles = [x for x in range(0,34) if tiles_34[x] in [1,3,4]]
                 single_tiles.sort(key=lambda x: (self.count_tiles([x], tiles_34) >= 2, -get_order(x)))
                 for s in single_tiles: # actually only #1 would be used most of the time
                     for r in results:

@@ -12,6 +12,9 @@ from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder
 from utils.logger import set_up_logging
 
+from collections import defaultdict
+import time
+
 logger = logging.getLogger('tenhou')
 
 
@@ -20,17 +23,19 @@ class TenhouLogReproducer(object):
     The way to debug bot decisions that it made in real tenhou.net games
     """
 
-    def __init__(self, log_url, stop_tag=None):
+    def __init__(self, log_url, stop_tag=None, params={}):
         log_id, player_position, needed_round = self._parse_url(log_url)
         log_content = self._download_log_content(log_id)
         rounds = self._parse_rounds(log_content)
 
         self.player_position = player_position
+        self.rounds = rounds
         self.round_content = rounds[needed_round]
         self.stop_tag = stop_tag
         self.decoder = TenhouDecoder()
+        self.params = params
 
-    def reproduce(self, dry_run=False):
+    def reproduce(self, dry_run=True, verbose=False):
         draw_tags = ['T', 'U', 'V', 'W']
         discard_tags = ['D', 'E', 'F', 'G']
 
@@ -39,68 +44,96 @@ class TenhouLogReproducer(object):
         player_draw_regex = re.compile('^<[{}]+\d*'.format(''.join(player_draw)))
         discard_regex = re.compile('^<[{}]+\d*'.format(''.join(discard_tags)))
 
-        table = Table()
-        for tag in self.round_content:
-            if dry_run:
-                print(tag)
+        table = Table(self.params)
 
-            if not dry_run and tag == self.stop_tag:
-                break
+        total = defaultdict(int)
+        results = defaultdict(int)
 
-            if 'INIT' in tag:
-                values = self.decoder.parse_initial_values(tag)
+        for i,r in enumerate(self.rounds):
+            print("Round:", i)
+            print()
+            for tag in r:
+                if dry_run:
+                    #print(tag)
+                    pass
 
-                shifted_scores = []
-                for x in range(0, 4):
-                    shifted_scores.append(values['scores'][self._normalize_position(x, self.player_position)])
+                if not dry_run and tag == self.stop_tag:
+                    break
 
-                table.init_round(
-                    values['round_number'],
-                    values['count_of_honba_sticks'],
-                    values['count_of_riichi_sticks'],
-                    values['dora_indicator'],
-                    self._normalize_position(self.player_position, values['dealer']),
-                    shifted_scores,
-                )
+                if 'INIT' in tag:
+                    values = self.decoder.parse_initial_values(tag)
 
-                hands = [
-                    [int(x) for x in self.decoder.get_attribute_content(tag, 'hai0').split(',')],
-                    [int(x) for x in self.decoder.get_attribute_content(tag, 'hai1').split(',')],
-                    [int(x) for x in self.decoder.get_attribute_content(tag, 'hai2').split(',')],
-                    [int(x) for x in self.decoder.get_attribute_content(tag, 'hai3').split(',')],
-                ]
+                    shifted_scores = []
+                    for x in range(0, 4):
+                        shifted_scores.append(values['scores'][self._normalize_position(x, self.player_position)])
 
-                table.player.init_hand(hands[self.player_position])
+                    table.init_round(
+                        values['round_number'],
+                        values['count_of_honba_sticks'],
+                        values['count_of_riichi_sticks'],
+                        values['dora_indicator'],
+                        self._normalize_position(self.player_position, values['dealer']),
+                        shifted_scores,
+                    )
 
-            if player_draw_regex.match(tag) and 'UN' not in tag:
-                tile = self.decoder.parse_tile(tag)
-                table.player.draw_tile(tile)
+                    hands = [
+                        [int(x) for x in self.decoder.get_attribute_content(tag, 'hai0').split(',')],
+                        [int(x) for x in self.decoder.get_attribute_content(tag, 'hai1').split(',')],
+                        [int(x) for x in self.decoder.get_attribute_content(tag, 'hai2').split(',')],
+                        [int(x) for x in self.decoder.get_attribute_content(tag, 'hai3').split(',')],
+                    ]
 
-            if discard_regex.match(tag) and 'DORA' not in tag:
-                tile = self.decoder.parse_tile(tag)
-                player_sign = tag.upper()[1]
-                player_seat = self._normalize_position(self.player_position, discard_tags.index(player_sign))
+                    table.player.init_hand(hands[self.player_position])
 
-                if player_seat == 0:
-                    table.player.discard_tile(tile)
-                else:
-                    table.add_discarded_tile(player_seat, tile, False)
+                if player_draw_regex.match(tag) and 'UN' not in tag:
+                    tile = self.decoder.parse_tile(tag)
+                    table.player.draw_tile(tile)
 
-            if '<N who=' in tag:
-                meld = self.decoder.parse_meld(tag)
-                player_seat = self._normalize_position(self.player_position, meld.who)
-                table.add_called_meld(player_seat, meld)
+                if discard_regex.match(tag) and 'DORA' not in tag:
+                    tile = self.decoder.parse_tile(tag)
+                    player_sign = tag.upper()[1]
+                    player_seat = self._normalize_position(self.player_position, discard_tags.index(player_sign))
 
-                if player_seat == 0:
-                    # we had to delete called tile from hand
-                    # to have correct tiles count in the hand
-                    if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
-                        table.player.draw_tile(meld.called_tile)
+                    if player_seat == 0:
+                        # TODO: add player's state, river, melds, and reach timepoint
+                        current_hand = TilesConverter.to_one_line_string(table.player.tiles)
+                        choice = table.player.ai.discard_tile(None)
+                        table.player.discard_tile(tile)
+                        match = int(tile == choice)
+                        total["TOTAL"] += 1
+                        results["TOTAL"] += match
+                        total[table.player.play_state] += 1
+                        results[table.player.play_state] += match
+                        if verbose:
+                            print("Hand:", current_hand)
+                            print("AI's Choice:", TilesConverter.to_one_line_string([choice]))
+                            print("MP's Choice:", TilesConverter.to_one_line_string(([tile])))
+                            print("AI's State:", table.player.play_state)
+                            print("Same:", tile == choice)
+                            print()
+                    else:
+                        table.add_discarded_tile(player_seat, tile, False)
 
-            if '<REACH' in tag and 'step="1"' in tag:
-                who_called_riichi = self._normalize_position(self.player_position,
-                                                             self.decoder.parse_who_called_riichi(tag))
-                table.add_called_riichi(who_called_riichi)
+                if '<N who=' in tag:
+                    meld = self.decoder.parse_meld(tag)
+                    player_seat = self._normalize_position(self.player_position, meld.who)
+                    table.add_called_meld(player_seat, meld)
+
+                    if player_seat == 0:
+                        # we had to delete called tile from hand
+                        # to have correct tiles count in the hand
+                        if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
+                            table.player.draw_tile(meld.called_tile)
+
+                if '<REACH' in tag and 'step="1"' in tag:
+                    who_called_riichi = self._normalize_position(self.player_position,
+                                                                 self.decoder.parse_who_called_riichi(tag))
+                    table.add_called_riichi(who_called_riichi)
+                    # TODO: add reach time point
+
+        if dry_run:
+            print(total, results)
+            return total, results
 
         if not dry_run:
             tile = self.decoder.parse_tile(self.stop_tag)
@@ -305,7 +338,38 @@ def parse_args_and_start_reproducer():
 
 
 def main():
-    parse_args_and_start_reproducer()
+    #parse_args_and_start_reproducer()
+
+    params_set = [
+        {},
+        {"force_honitsu":True},
+        {"big_diff":True},
+    ]
+
+    t0 = time.time()
+
+    for params in params_set:
+        total_all = defaultdict(int)
+        results_all = defaultdict(int)
+        for log_id in os.listdir("full_logs")[:1000]: # total 2800
+            #print(l[:-6])
+            log_url = "https://tenhou.net/0/?log={}".format(log_id[:-6])
+            try:
+                total, results = TenhouLogReproducer(log_url, params=params).reproduce(True, False)
+                for k in total:
+                    total_all[k] += total[k]
+                    results_all[k] += results[k]
+            except Exception as e:
+                print("There is a bug:", e)
+                #raise e
+
+        print("\nPARAMS:", params)
+        print("\nRESULTS:")
+        for k in total_all:
+            print(k, ":", results_all[k]/total_all[k])
+
+    print("Running time:", time.time()-t0)
+
 
 
 if __name__ == '__main__':

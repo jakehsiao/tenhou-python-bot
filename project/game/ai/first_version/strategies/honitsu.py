@@ -35,13 +35,12 @@ class HonitsuStrategy(BaseStrategy):
                 count_of_pairs += 1
 
         suits.remove(suit)
-        #count_of_ryanmens = self._find_ryanmen_waits(tiles_34, suits[0]['function'])
-        #count_of_ryanmens += self._find_ryanmen_waits(tiles_34, suits[1]['function'])
+        count_of_ryanmens = self._find_ryanmen_waits(tiles_34, suits[0]['function'])
+        count_of_ryanmens += self._find_ryanmen_waits(tiles_34, suits[1]['function'])
 
         # it is a bad idea go for honitsu with ryanmen in other suit
-        # no, it's not
-        #if count_of_ryanmens > 0 and not self.player.is_open_hand:
-        #    return False
+        if count_of_ryanmens > 0 and not self.player.is_open_hand and not self.player.params.get("force_honitsu"):
+            return False
 
         # we need to have prevalence of one suit and completed forms in the hand
         # for now let's check only pairs in the hand

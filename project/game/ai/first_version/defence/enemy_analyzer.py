@@ -69,12 +69,12 @@ class EnemyAnalyzer(object):
                 return True
 
             # check that user has a discard and melds that looks like honitsu
-            # No need to check this!
-            #is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
+            if len(self.player.discards) >= 10:
+                is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
 
         if is_honitsu_open_sets:
             # for 2 opened melds we had to check discard, to be sure
-            if len(self.player.melds) <= 2 and is_honitsu_discards and discard_suit == open_hand_suit:
+            if len(self.player.melds) == 2 and is_honitsu_discards and discard_suit == open_hand_suit:
                 self.chosen_suit = open_hand_suit
                 return True
 

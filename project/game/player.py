@@ -119,7 +119,7 @@ class Player(PlayerInterface):
     in_tempai = False
     in_defence_mode = False
 
-    def __init__(self, table, seat, dealer_seat):
+    def __init__(self, table, seat, dealer_seat, params={}):
         super().__init__(table, seat, dealer_seat)
 
         self.ai = settings.AI_CLASS(self)
@@ -129,6 +129,8 @@ class Player(PlayerInterface):
         self.play_state = "PREPARING" # EH: Change this to enum
         self.latest_change_index = 0
         self.counter_value = 0
+        self.params = params
+        self.in_seven_pairs = False
 
     def erase_state(self):
         super().erase_state()
@@ -141,6 +143,7 @@ class Player(PlayerInterface):
         # added for cowboy
         self.play_state = "PREPARING"
         self.latest_change_index = 0
+        self.in_seven_pairs = False
 
         if self.ai:
             self.ai.erase_state()

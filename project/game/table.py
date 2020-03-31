@@ -33,8 +33,8 @@ class Table(object):
     has_open_tanyao = False
     has_aka_dora = False
 
-    def __init__(self):
-        self._init_players()
+    def __init__(self, params={}):
+        self._init_players(params)
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
 
@@ -177,8 +177,8 @@ class Table(object):
             tile //= 4
             self.revealed_tiles[tile] += 1
 
-    def _init_players(self,):
-        self.player = Player(self, 0, self.dealer_seat)
+    def _init_players(self, params):
+        self.player = Player(self, 0, self.dealer_seat, params)
 
         self.players = [self.player]
         for seat in range(1, self.count_of_players):

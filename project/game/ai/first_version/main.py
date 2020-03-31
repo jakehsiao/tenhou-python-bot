@@ -303,7 +303,37 @@ class ImplementationAI(InterfaceAI):
             # and let's find all tiles with same shanten
             results_with_same_shanten = [x for x in results if x.shanten == temp_tile.shanten]
 
+            # if there are 7 pairs
+            tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+            paired_tiles = [x for x in range(0, 34) if tiles_34[x] == 2]
+            num_pairs = len(paired_tiles)
 
+            if num_pairs == 4 and temp_tile.shanten > 0 and not self.player.in_seven_pairs and not self.player.params.get("fool_in_pairs"):
+                logger.info("There are 4 pairs!")
+
+                if len(self.player.discards) > 6:
+                    logger.info("However it's too late for seven pairs.")
+                    for r in results:
+                        if r.tile_to_discard in paired_tiles:
+                            logger.info("With hand: {}".format(display_waiting(self.player.tile)))
+                            logger.info("Discard {}".format(display_waiting([r.tile_to_discard*4])))
+                            return r
+                else:
+                    logger.info("It's early, okay to go with seven pairs.")
+                    self.player.in_seven_pairs = True
+
+
+            # TODO: a smart seven pairs strategy should be carried
+            if self.player.in_seven_pairs and not self.player.params.get("fool_in_pairs"):
+                single_tiles = [x for x in range(0,34) if tiles_34[x] == 1]
+                single_tiles.sort(key=lambda x: (self.count_tiles([x], tiles_34) >= 2, -get_order(x)))
+                for s in single_tiles: # actually only #1 would be used most of the time
+                    for r in results:
+                        if r.tile_to_discard == s:
+                            logger.info("SevenPairsStrategy:")
+                            logger.info("Hand: {}".format(display_waiting(self.player.tiles)))
+                            logger.info("Discard: {}".format(display_waiting([s*4])))
+                            return r
 
 
             # if in drawing
@@ -352,7 +382,10 @@ class ImplementationAI(InterfaceAI):
                 # let's check all other tiles with same shanten
                 # maybe we can find tiles that have almost same tiles count number
                 # Cowboy: +-2 is a big difference, but +-1 is not
-                if temp_tile.tiles_count - 1 < discard_option.tiles_count < temp_tile.tiles_count + 1:
+                diff = 1
+                if self.player.params.get("big_diff"):
+                    diff = 2
+                if temp_tile.tiles_count - diff < discard_option.tiles_count < temp_tile.tiles_count + diff:
                     possible_options.append(discard_option)
 
             # let's sort got tiles by value and let's chose less valuable tile to discard
@@ -428,7 +461,7 @@ class ImplementationAI(InterfaceAI):
             return True
 
         # Get the rank EV after round 3
-        if self.table.round_number >= 3:  # DEBUG: set this to 0
+        if self.table.round_number >= 5:  # DEBUG: set this to 0
             try:
                 possible_hand_values = [self.estimate_hand_value(tile, call_riichi=True).cost["main"] for tile in self.waiting]
             except Exception as e:

@@ -315,8 +315,8 @@ class ImplementationAI(InterfaceAI):
                     logger.info("However it's too late for seven pairs.")
                     for r in results:
                         if r.tile_to_discard in paired_tiles:
-                            logger.info("With hand: {}".format(display_waiting(self.player.tiles)))
-                            logger.info("Discard {}".format(display_waiting([r.tile_to_discard*4])))
+                            logger.info("With hand: {}".format(TilesConverter.to_one_line_string(self.player.tiles)))
+                            logger.info("Discard {}".format(display_waiting([r.tile_to_discard])))
                             return r
                 else:
                     logger.info("It's early, okay to go with seven pairs.")
@@ -331,8 +331,8 @@ class ImplementationAI(InterfaceAI):
                     for r in results:
                         if r.tile_to_discard == s:
                             logger.info("SevenPairsStrategy:")
-                            logger.info("Hand: {}".format(display_waiting(self.player.tiles)))
-                            logger.info("Discard: {}".format(display_waiting([s*4])))
+                            logger.info("Hand: {}".format(TilesConverter.to_one_line_string(self.player.tiles)))
+                            logger.info("Discard: {}".format(display_waiting([s])))
                             return r
 
 

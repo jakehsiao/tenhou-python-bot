@@ -341,9 +341,9 @@ def main():
     #parse_args_and_start_reproducer()
 
     params_set = [
-        {},
-        {"force_honitsu":True},
-        {"big_diff":True},
+          {},
+    #     {"force_honitsu":True},
+    #     {"big_diff":True},
     ]
 
     t0 = time.time()

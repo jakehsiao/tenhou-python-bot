@@ -315,7 +315,7 @@ class ImplementationAI(InterfaceAI):
                     logger.info("However it's too late for seven pairs.")
                     for r in results:
                         if r.tile_to_discard in paired_tiles:
-                            logger.info("With hand: {}".format(display_waiting(self.player.tile)))
+                            logger.info("With hand: {}".format(display_waiting(self.player.tiles)))
                             logger.info("Discard {}".format(display_waiting([r.tile_to_discard*4])))
                             return r
                 else:
